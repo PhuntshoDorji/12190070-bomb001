@@ -1,1 +1,94 @@
+It pushes a string onto the stack before callin the function <strings_not_equal>. The given string  is stored in $eax register and other in 0x401339. If the strings are equal the function runs <je> and jumps over <explode_bomb>. In phase 1, it takes a user input and compares with the input stored in $eax register.
+
+   //used to get the assembly code
+lab2@lab2-OptiPlex-3040:~/Desktop/12190070/ComputerSystem1/Assignment1/bomb001$ objdump -d bomb> bomb.s
+
+   //navigate to the directory in which it extract the bomb frim the start
+lab2@lab2-OptiPlex-3040:~/Desktop/12190070/ComputerSystem1/Assignment1/bomb001$ gdb bomb
+GNU gdb (Ubuntu 10.1-2ubuntu2) 10.1.90.20210411-git
+Copyright (C) 2021 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from bomb...
+
+    //it will check there is breakpoint or not
+(gdb) info break
+No breakpoints or watchpoints.
+
+   //breakpoint stops the code from executing it is reached and if we make mistake, it will prevent the bomb from exploding
+(gdb) break phase_1
+Breakpoint 1 at 0x400e8d
+
+   //it will run the code
+(gdb) run
+Starting program: /home/lab2/Desktop/12190070/ComputerSystem1/Assignment1/bomb001/bomb 
+Welcome to my fiendish little bomb. You have 6 phases with
+which to blow yourself up. Have a nice day!
+it is a try
+Breakpoint 1, 0x0000000000400e8d in phase_1 ()
+
+   //it will shortened for disasemble 
+(gdb) disas
+Dump of assembler code for function phase_1:
+=> 0x0000000000400e8d <+0>:	sub    $0x8,%rsp
+   0x0000000000400e91 <+4>:	mov    $0x4023d0,%esi
+   0x0000000000400e96 <+9>:	call   0x40133e <strings_not_equal>
+   0x0000000000400e9b <+14>:	test   %eax,%eax
+   0x0000000000400e9d <+16>:	je     0x400ea4 <phase_1+23>
+   0x0000000000400e9f <+18>:	call   0x40143d <explode_bomb>
+   0x0000000000400ea4 <+23>:	add    $0x8,%rsp
+   0x0000000000400ea8 <+27>:	ret    
+End of assembler dump.
+
+   //it will print the  memory address of eax
+(gdb) p/s $eax
+$1 = 6305696
+
+   //it will show the string that are present in eax address and it is a input given by me
+(gdb) x/s 6305696
+0x6037a0 <input_strings>:	"it is a try"
+
+   //it will move to the pointer to the next instruction
+(gdb) ni
+0x0000000000400e91 in phase_1 ()
+(gdb) disas
+Dump of assembler code for function phase_1:
+   0x0000000000400e8d <+0>:	sub    $0x8,%rsp
+=> 0x0000000000400e91 <+4>:	mov    $0x4023d0,%esi
+   0x0000000000400e96 <+9>:	call   0x40133e <strings_not_equal>
+   0x0000000000400e9b <+14>:	test   %eax,%eax
+   0x0000000000400e9d <+16>:	je     0x400ea4 <phase_1+23>
+   0x0000000000400e9f <+18>:	call   0x40143d <explode_bomb>
+   0x0000000000400ea4 <+23>:	add    $0x8,%rsp
+   0x0000000000400ea8 <+27>:	ret    
+End of assembler dump.
+
+   //it will print the value at that address
+(gdb) x/s 0x4023d0
+0x4023d0:	"The moon unit will be divided into two divisions."				//these is the answer of phase_1
+
+   //delete the break point
+(gdb) delete break
+Delete all breakpoints? (y or n) y
+
+   //run the program
+(gdb) run
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /home/lab2/Desktop/12190070/ComputerSystem1/Assignment1/bomb001/bomb 
+Welcome to my fiendish little bomb. You have 6 phases with
+which to blow yourself up. Have a nice day!
+The moon unit will be divided into two divisions.
+Phase 1 defused. How about the next one?				//phase_1 has been defused
 
